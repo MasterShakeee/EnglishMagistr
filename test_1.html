@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Тест по английской лексике и грамматике</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 15px;
+    line-height: 1.5;
+    color: #222;
+  }
+  h1 { font-size: 22px; }
+  .question {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 12px 15px;
+    margin-bottom: 14px;
+  }
+  .qtext { font-weight: bold; margin-bottom: 8px; }
+  .options label {
+    display: block;
+    padding: 4px 6px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .options label:hover { background: #f0f0f0; }
+  button#submitBtn {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 15px 0;
+  }
+  .correct { background: #d4f7d4; }
+  .incorrect { background: #fbd4d4; }
+  .answerNote {
+    margin-top: 6px;
+    font-size: 14px;
+  }
+  #score {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 15px 0;
+    padding: 10px;
+    border-radius: 6px;
+    background: #eef;
+    display: none;
+  }
+  #mistakesSummary {
+    margin-top: 20px;
+    display: none;
+  }
+  #mistakesSummary h2 { font-size: 18px; }
+</style>
+</head>
+<body>
+
+<h1>Лексика - грамматический тест - 1</h1>
+<p>Ответь на все вопросы и нажми "Проверить", чтобы увидеть результат и разбор ошибок.</p>
+
+<div id="quiz"></div>
+<button id="submitBtn">Проверить</button>
+<div id="score"></div>
+<div id="mistakesSummary">
+  <h2>Разбор ошибок</h2>
+  <div id="mistakesList"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    num: 17,
+    text: '"What is ___ name?" "My name\u2019s Ronaldo."',
+    options: {A: "your", B: "his", C: "my", D: "her"},
+    correct: "A"
+  },
+  {
+    num: 18,
+    text: "My friend lives in ___.",
+    options: {A: "Hollands", B: "Holland", C: "the Holland", D: "a Holland"},
+    correct: "B"
+  },
+  {
+    num: 19,
+    text: "The weather is awful, it ___ all day.",
+    options: {A: "is raining", B: "rained", C: "has been raining", D: "has rained"},
+    correct: "C"
+  },
+  {
+    num: 20,
+    text: "Find an example of Subjunctive mood",
+    options: {A: "Give me an answer", B: "I wish I could give you an answer", C: "I can give you an answer", D: "Could I give you an answer?"},
+    correct: "B"
+  },
+  {
+    num: 21,
+    text: "I decided ___ him because I was wrong.",
+    options: {A: "to apologize", B: "apologizing", C: "apologized", D: "apologize"},
+    correct: "A"
+  },
+  {
+    num: 22,
+    text: "I remember this man ___ the competition",
+    options: {A: "winning", B: "wined", C: "win", D: "won"},
+    correct: "A"
+  },
+  {
+    num: 23,
+    text: "She had paint on her hands because she ___ all the day.",
+    options: {A: "has been drawing", B: "was drawing", C: "had been drawing", D: "have been drawing"},
+    correct: "C"
+  },
+  {
+    num: 24,
+    text: "They ___ like this before.",
+    options: {A: "were never quarreled", B: "never has quarreled", C: "never quarrel", D: "have never quarreled"},
+    correct: "D"
+  },
+  {
+    num: 25,
+    text: "In the evening we went to ___ theatre.",
+    options: {A: "an", B: "the", C: "a", D: "-"},
+    correct: "B"
+  },
+  {
+    num: 26,
+    text: "The Indicative Mood:",
+    options: {A: "Parking prohibited", B: "All the stories were interesting.", C: "If only I finished this exercise on time.", D: "A nice day"},
+    correct: "B"
+  },
+  {
+    num: 27,
+    text: "She is very keen ___ the course.",
+    options: {A: "does", B: "do", C: "to be done", D: "to do"},
+    correct: "D"
+  },
+  {
+    num: 28,
+    text: "I think I ___ free tomorrow.",
+    options: {A: "be going to be", B: "are going", C: "will have been", D: "will be"},
+    correct: "D"
+  },
+  {
+    num: 29,
+    text: "There will be no computer class tomorrow as we are upgrading the computer server.",
+    options: {A: "Subjunctive Mood", B: "Imperative Mood", C: "Indicative Mood", D: "Interrogative Mood"},
+    correct: "C"
+  },
+  {
+    num: 30,
+    text: "I was very tired when I got home, because I ___ hard all day.",
+    options: {A: "has been working", B: "had been working", C: "have worked", D: "have been working"},
+    correct: "B"
+  },
+  {
+    num: 31,
+    text: "The work ___ by 6 o\u2019clock.",
+    options: {A: "will be done", B: "will do", C: "will has been done", D: "will have been done"},
+    correct: "D"
+  },
+  {
+    num: 32,
+    text: "\u201c___ pen is this?\u201d",
+    options: {A: "Who", B: "Whose", C: "Which", D: "That"},
+    correct: "B"
+  },
+  {
+    num: 33,
+    text: "I was bad ___ lying.",
+    options: {A: "in", B: "of", C: "at", D: "-"},
+    correct: "C"
+  },
+  {
+    num: 34,
+    text: "Active and Passive voice: Children should ___ warned not to speak to strangers.",
+    options: {A: "be", B: "are", C: "-", D: "were"},
+    correct: "A"
+  }
+];
+
+const quizDiv = document.getElementById('quiz');
+
+questions.forEach((q, i) => {
+  const qDiv = document.createElement('div');
+  qDiv.className = 'question';
+  qDiv.id = 'q' + i;
+
+  let optionsHtml = '';
+  for (const key in q.options) {
+    optionsHtml += `
+      <label>
+        <input type="radio" name="q${i}" value="${key}"> ${key}) ${q.options[key]}
+      </label>`;
+  }
+
+  qDiv.innerHTML = `
+    <div class="qtext">${q.num}. ${q.text}</div>
+    <div class="options">${optionsHtml}</div>
+    <div class="answerNote"></div>
+  `;
+  quizDiv.appendChild(qDiv);
+});
+
+document.getElementById('submitBtn').addEventListener('click', () => {
+  let correctCount = 0;
+  const mistakes = [];
+
+  questions.forEach((q, i) => {
+    const qDiv = document.getElementById('q' + i);
+    const selected = qDiv.querySelector(`input[name="q${i}"]:checked`);
+    const note = qDiv.querySelector('.answerNote');
+
+    if (!selected) {
+      note.textContent = 'Не отвечено. Правильный ответ: ' + q.correct + ') ' + q.options[q.correct];
+      qDiv.classList.add('incorrect');
+      mistakes.push(q);
+      return;
+    }
+
+    if (selected.value === q.correct) {
+      correctCount++;
+      qDiv.classList.add('correct');
+      note.textContent = 'Верно!';
+    } else {
+      qDiv.classList.add('incorrect');
+      note.textContent = `Неверно. Ваш ответ: ${selected.value}) ${q.options[selected.value]}. Правильный ответ: ${q.correct}) ${q.options[q.correct]}`;
+      mistakes.push(q);
+    }
+  });
+
+  const scoreDiv = document.getElementById('score');
+  scoreDiv.style.display = 'block';
+  scoreDiv.textContent = `Результат: ${correctCount} из ${questions.length}`;
+
+  const mistakesSummary = document.getElementById('mistakesSummary');
+  const mistakesList = document.getElementById('mistakesList');
+  mistakesList.innerHTML = '';
+
+  if (mistakes.length > 0) {
+    mistakesSummary.style.display = 'block';
+    mistakes.forEach(q => {
+      const div = document.createElement('div');
+      div.style.marginBottom = '10px';
+      div.innerHTML = `<b>${q.num}.</b> ${q.text}<br>Правильный ответ: <b>${q.correct}) ${q.options[q.correct]}</b>`;
+      mistakesList.appendChild(div);
+    });
+  } else {
+    mistakesSummary.style.display = 'block';
+    mistakesList.innerHTML = '<p>Ошибок нет — отлично!</p>';
+  }
+
+  window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+});
+</script>
+
+</body>
+</html>
