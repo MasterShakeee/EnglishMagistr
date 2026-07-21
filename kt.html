@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>КТ - Контрольный тест</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 15px 90px 15px;
+    line-height: 1.5;
+    color: #222;
+  }
+  h1 { font-size: 22px; }
+  h2.sectionTitle {
+    font-size: 19px;
+    margin-top: 30px;
+    border-top: 2px solid #ddd;
+    padding-top: 20px;
+  }
+  #tabs {
+    display: flex;
+    gap: 8px;
+    margin: 15px 0 20px 0;
+    border-bottom: 2px solid #ddd;
+    flex-wrap: wrap;
+  }
+  .tabBtn {
+    padding: 10px 16px;
+    font-size: 15px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 3px solid transparent;
+    color: #555;
+    font-weight: bold;
+  }
+  .tabBtn.active {
+    color: #1a5fb4;
+    border-bottom: 3px solid #1a5fb4;
+  }
+  .tabBtn:hover { color: #1a5fb4; }
+  .tabPanel { display: none; }
+  .tabPanel.active { display: block; }
+  .question {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 12px 15px;
+    margin-bottom: 14px;
+  }
+  .qtext { font-weight: bold; margin-bottom: 8px; }
+  .options label {
+    display: block;
+    padding: 4px 6px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .options label:hover { background: #f0f0f0; }
+  .correct { background: #d4f7d4; }
+  .incorrect { background: #fbd4d4; }
+  .answerNote {
+    margin-top: 6px;
+    font-size: 14px;
+  }
+  .rule {
+    margin-top: 8px;
+    font-size: 13px;
+    background: #fffbe0;
+    border-left: 3px solid #e0c000;
+    padding: 6px 10px;
+    border-radius: 3px;
+  }
+  .score {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 15px 0;
+    padding: 10px;
+    border-radius: 6px;
+    background: #eef;
+    display: none;
+  }
+  .audioBox {
+    background: #eef;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+  }
+  .passage {
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px 18px;
+    margin-bottom: 20px;
+  }
+  .passage h3 {
+    margin-top: 0;
+    font-size: 17px;
+    text-align: center;
+  }
+  .passage p {
+    margin: 8px 0;
+    font-size: 15px;
+    text-align: justify;
+  }
+  #fixedBtnWrap {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    z-index: 100;
+  }
+  #actionBtn {
+    padding: 12px 22px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: #1a5fb4;
+    color: white;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  }
+  #actionBtn:hover { background: #14488e; }
+  #actionBtn:disabled {
+    background: #999;
+    cursor: default;
+  }
+</style>
+</head>
+<body>
+
+<h1>КТ — Контрольный тест (50 вопросов)</h1>
+<p>Выбери раздел, ответь на вопросы и нажми "Проверить" (кнопка внизу слева).</p>
+
+<div id="tabs">
+  <button class="tabBtn active" data-cat="listening">🎧 Listening</button>
+  <button class="tabBtn" data-cat="grammar">📝 Grammar</button>
+  <button class="tabBtn" data-cat="reading">📖 Reading</button>
+</div>
+
+<div id="panel-listening" class="tabPanel active">
+  <div class="audioBox">
+    <p style="margin:0 0 6px 0; font-weight:bold;">🎧 Аудио к вопросам 1-8:</p>
+    <audio controls style="width:100%;">
+      <source src="audio/1-8.mp3" type="audio/mpeg">
+      Твой браузер не поддерживает аудио.
+    </audio>
+    <p style="margin:14px 0 6px 0; font-weight:bold;">🎧 Аудио к вопросам 9-16:</p>
+    <audio controls style="width:100%;">
+      <source src="audio/9-18.mp3" type="audio/mpeg">
+      Твой браузер не поддерживает аудио.
+    </audio>
+  </div>
+  <div class="quizContainer" id="quiz-listening"></div>
+  <div class="score" id="score-listening"></div>
+  <div class="mistakesWork" id="mistakesWork-listening" style="display:none;">
+    <h2 class="sectionTitle">Работа над ошибками</h2>
+    <p>Заново ответь на вопросы, где была допущена ошибка. Под каждым — краткое правило.</p>
+    <div id="mistakesQuiz-listening"></div>
+  </div>
+  <div class="finalMessage" id="finalMessage-listening"></div>
+</div>
+
+<div id="panel-grammar" class="tabPanel">
+  <div class="quizContainer" id="quiz-grammar"></div>
+  <div class="score" id="score-grammar"></div>
+  <div class="mistakesWork" id="mistakesWork-grammar" style="display:none;">
+    <h2 class="sectionTitle">Работа над ошибками</h2>
+    <p>Заново ответь на вопросы, где была допущена ошибка. Под каждым — краткое правило.</p>
+    <div id="mistakesQuiz-grammar"></div>
+  </div>
+  <div class="finalMessage" id="finalMessage-grammar"></div>
+</div>
+
+<div id="panel-reading" class="tabPanel">
+<div class="passage">
+<h3>Madagascar</h3>
+<p>Madagascar has two seasons, a warm, wet season from November to April, and a cooler dry season between May and October. However, different parts of the country have very different weather.</p>
+<p>The east coast is hotter and wetter, with up to 4000mm of rainfall per year. In the rainy season, there are strong winds, and these can cause a lot of damage.  Avoid visiting eastern Madagascar between January and March because the weather can make road travel very difficult. The dry season is cooler and more pleasant.</p>
+<p>The high, central part of the country is much drier and cooler. About 1,400 mm of rain falls in the rainy season, with some thunderstorms, but the summer is usually sunny and dry, but it can be cold, especially in the mornings, with freezing showers, and it may snow in mountain areas above 2,400m, and even stay there for several days.</p>
+<p>The west coast is the driest part of the island. Here, the winter months are pleasant with little rain, cooler temperatures and blue skies. The summers can be extremely hot, especially in the southwest. This part of the country is semi-desert, and only gets around 300mm of rain per year.</p>
+</div>
+  <div class="quizContainer" id="quiz-reading-1"></div>
+<div class="passage">
+<h3>A MUSICAL BOOST</h3>
+<p>Is there a connection between music and language? According to recent studies, the answer is yes: music boosts certain language abilities in the brain. Here, we look at two examples.</p>
+<p><b>Music and Hearing</b></p>
+<p>A recent study by researcher Nina Kraus shows that playing a musical instrument can improve a person's hearing ability. As a part of the study, two groups of people listened to a person talking in a noisy room. The people in the first group were musicians, while those in the second group had no musical training. The musicians were able to hear the talking person more clearly.</p>
+<p>Musicians hear better, says Kraus, because they learn to pay attention to certain sounds. Think about violinists in an orchestra. When the violinists play with the group, they hear their own instrument and many others too. But the violinists must listen closely to what they are playing, and ignore the other sounds. In this way, musicians are able to concentrate on certain sounds, even in a room with lots of noise.</p>
+<p><b>Music and Speaking</b></p>
+<p>Gottfried Schlaug, a doctor at Harvard Medical School, works with stroke patients. Because of their illness, these people cannot say their names, addresses, or other information normally. However, they can still sing. Dr. Schlaug was surprised to find that singing words helped his patients to eventually speak. Why does this work? Schlaug isn't sure. Music seems to activate different parts of the brain, including the damaged parts. This somehow helps patients to use that part of the brain again.</p>
+<p><b>Understanding the Results</b></p>
+<p>Music improves concentration, memory, listening skills, and our overall language abilities. It can even help sick people get better. Playing an instrument or singing, says Nina Kraus, can help us do better in school and keep our brain sharp as we get older. Music, she adds is not only enjoyable, it's also good for us in many other ways.</p>
+</div>
+  <div class="quizContainer" id="quiz-reading-2"></div>
+  <div class="score" id="score-reading"></div>
+  <div class="mistakesWork" id="mistakesWork-reading" style="display:none;">
+    <h2 class="sectionTitle">Работа над ошибками</h2>
+    <p>Заново ответь на вопросы, где была допущена ошибка. Под каждым — краткое правило.</p>
+    <div id="mistakesQuiz-reading"></div>
+  </div>
+  <div class="finalMessage" id="finalMessage-reading"></div>
+</div>
+
+<div id="fixedBtnWrap">
+  <button id="actionBtn">Проверить</button>
+</div>
+
+<script>
+const categoriesData = {
+  "listening": {
+    "label": "🎧 Listening (1-16)",
+    "questions": [
+      {
+        "num": 1,
+        "text": "Fighting negative stereotypes involves learning about ______.",
+        "options": {
+          "A": "new books",
+          "B": "recent events",
+          "C": "different cultures",
+          "D": "weather forecast"
+        },
+        "correct": "C",
+        "rule": "По смыслу: борьба со стереотипами связана с изучением разных культур — это ключевая идея текста о стереотипах."
+      },
+      {
+        "num": 2,
+        "text": "National holidays also ___ family values and traditions.",
+        "options": {
+          "A": "ignore",
+          "B": "deny",
+          "C": "highlight",
+          "D": "neglect"
+        },
+        "correct": "C",
+        "rule": "‘Highlight’ = подчёркивать, выделять. Национальные праздники подчёркивают семейные ценности."
+      },
+      {
+        "num": 3,
+        "text": "Independence Day and Chinese New Year symbolize cultural values and ___.",
+        "options": {
+          "A": "industrial growth",
+          "B": "modern technology",
+          "C": "national traditions",
+          "D": "economic policies"
+        },
+        "correct": "C",
+        "rule": "Праздники символизируют культурные ценности и национальные традиции — логическая пара понятий."
+      },
+      {
+        "num": 4,
+        "text": "Stereotypes form from history, media and ___ experiences.",
+        "options": {
+          "A": "economic",
+          "B": "geographical",
+          "C": "political",
+          "D": "personal"
+        },
+        "correct": "D",
+        "rule": "Стереотипы формируются из истории, СМИ и личного опыта (personal experiences)."
+      },
+      {
+        "num": 5,
+        "text": "___ French is often stereotyped as being always romantic",
+        "options": {
+          "A": "few",
+          "B": "most",
+          "C": "some",
+          "D": "every"
+        },
+        "correct": "D",
+        "rule": "‘Every French [person] is often stereotyped...’ — every + существительное в ед. числе используется для обобщения."
+      },
+      {
+        "num": 6,
+        "text": "Some people assume all British people drink ___ all day.",
+        "options": {
+          "A": "water",
+          "B": "wine",
+          "C": "tea",
+          "D": "coffee"
+        },
+        "correct": "C",
+        "rule": "Классический стереотип о британцах — постоянное чаепитие (tea all day)."
+      },
+      {
+        "num": 7,
+        "text": "Open discussions   promote understanding among different cultures ___.",
+        "options": {
+          "A": "which is optional",
+          "B": "only during holidays",
+          "C": "which is essential",
+          "D": "which leads to conflicts"
+        },
+        "correct": "C",
+        "rule": "Открытые дискуссии способствуют пониманию между культурами, и это является необходимым (which is essential)."
+      },
+      {
+        "num": 8,
+        "text": "Stereotypes come from history, media, and ____.",
+        "options": {
+          "A": "personal experiences",
+          "B": "literature",
+          "C": "government policies",
+          "D": "travel"
+        },
+        "correct": "A",
+        "rule": "Та же идея, что и в вопросе 4: стереотипы формируются из истории, медиа и личного опыта."
+      },
+      {
+        "num": 9,
+        "text": "Dubai Shopping Festival lasts",
+        "options": {
+          "A": "two months",
+          "B": "one month",
+          "C": "three months",
+          "D": "four months"
+        },
+        "correct": "B",
+        "rule": "Фестиваль шопинга в Дубае длится один месяц (one month)."
+      },
+      {
+        "num": 10,
+        "text": "Dubai Shopping Festival sells",
+        "options": {
+          "A": "artificial snow",
+          "B": "brand clothes",
+          "C": "adventure books",
+          "D": "nightly fireworks"
+        },
+        "correct": "B",
+        "rule": "На фестивале шопинга продаются брендовые вещи (brand clothes) со скидками."
+      },
+      {
+        "num": 11,
+        "text": "In Dubai there are",
+        "options": {
+          "A": "only month – long shopping",
+          "B": "no shopping centres",
+          "C": "many activities to enjoy",
+          "D": "no tourists year round"
+        },
+        "correct": "C",
+        "rule": "Логически только один вариант положительный и правдоподобный для туристического текста о Дубае."
+      },
+      {
+        "num": 12,
+        "text": "Dubai is surrounded by",
+        "options": {
+          "A": "resorts",
+          "B": "desert",
+          "C": "woods",
+          "D": "forests"
+        },
+        "correct": "B",
+        "rule": "Фактически Дубай расположен в пустыне (Аравийская пустыня)."
+      },
+      {
+        "num": 13,
+        "text": "Ski Dubai is a/an",
+        "options": {
+          "A": "snow park",
+          "B": "sanddunes",
+          "C": "beach resort",
+          "D": "health resort"
+        },
+        "correct": "A",
+        "rule": "Ski Dubai — известный крытый снежный парк (indoor snow park) в торговом центре Mall of the Emirates."
+      },
+      {
+        "num": 14,
+        "text": "Dubai attracts tourists with sunny",
+        "options": {
+          "A": "restaurants",
+          "B": "hotels",
+          "C": "beaches",
+          "D": "architecture"
+        },
+        "correct": "C",
+        "rule": "‘Sunny’ логично сочетается с ‘beaches’ (солнечные пляжи)."
+      },
+      {
+        "num": 15,
+        "text": "Dubai Shopping Festival is famous for its",
+        "options": {
+          "A": "big sales",
+          "B": "localfood",
+          "C": "scuba diving",
+          "D": "sports events"
+        },
+        "correct": "A",
+        "rule": "Shopping Festival = фестиваль шопинга, известен именно большими распродажами (big sales)."
+      },
+      {
+        "num": 16,
+        "text": "The number of annual visitors come to Dubai",
+        "options": {
+          "A": "millions",
+          "B": "thousands",
+          "C": "hundreds",
+          "D": "billions"
+        },
+        "correct": "A",
+        "rule": "Дубай реально принимает миллионы туристов в год."
+      }
+    ]
+  },
+  "grammar": {
+    "label": "📝 Grammar (17-34)",
+    "questions": [
+      {
+        "num": 17,
+        "text": "_ has improved enourmosly.",
+        "options": {
+          "A": "Agila’s piano playing",
+          "B": "Agilas’ piano playing",
+          "C": "Agila piano playing",
+          "D": "Agila playing piano"
+        },
+        "correct": "A",
+        "rule": "Притяжательный падеж для одушевлённого существительного в единственном числе: ‘Agila’s’ (апостроф перед s)."
+      },
+      {
+        "num": 18,
+        "text": "Young children usually start school at the age of ____.",
+        "options": {
+          "A": "twelve",
+          "B": "seven",
+          "C": "three",
+          "D": "ten"
+        },
+        "correct": "B",
+        "rule": "В большинстве систем образования (включая Казахстан) дети начинают школу в 7 лет."
+      },
+      {
+        "num": 19,
+        "text": "It was an __________ experience. I was so ________.",
+        "options": {
+          "A": "amazing/exciting",
+          "B": "amazed / excited",
+          "C": "amazed / exciting",
+          "D": "amazing / excited"
+        },
+        "correct": "D",
+        "rule": "Причастие на -ing описывает предмет/явление, вызывающее чувство (an amazing experience), а причастие на -ed описывает состояние человека (I was excited)."
+      },
+      {
+        "num": 20,
+        "text": "You are _______ woman I’ve ever met in my life!",
+        "options": {
+          "A": "an beautiful",
+          "B": "more beautiful",
+          "C": "the most beautiful",
+          "D": "the beautifuller"
+        },
+        "correct": "C",
+        "rule": "Конструкция превосходной степени ‘the most + прилагательное + ever’."
+      },
+      {
+        "num": 21,
+        "text": "Please give me ___ pen.",
+        "options": {
+          "A": "those",
+          "B": "it",
+          "C": "these",
+          "D": "that"
+        },
+        "correct": "D",
+        "rule": "‘Pen’ — единственное число, нужно единственное указательное местоимение: this/that."
+      },
+      {
+        "num": 22,
+        "text": "The meeting will start on Monday. It is _________ of June.",
+        "options": {
+          "A": "the one",
+          "B": "one",
+          "C": "the first",
+          "D": "first"
+        },
+        "correct": "C",
+        "rule": "Даты называются порядковыми числительными с определённым артиклем: ‘the first of June’."
+      },
+      {
+        "num": 23,
+        "text": "He ___ his work before you came",
+        "options": {
+          "A": "finishes",
+          "B": "has finished",
+          "C": "hadfinished",
+          "D": "finished"
+        },
+        "correct": "C",
+        "rule": "Past Perfect (had + V3) — действие завершилось до другого действия в прошлом (before you came)."
+      },
+      {
+        "num": 24,
+        "text": "My teacher suggested ______________ an interpreter in the future.",
+        "options": {
+          "A": "to becoming",
+          "B": "becoming",
+          "C": "to become",
+          "D": "become"
+        },
+        "correct": "B",
+        "rule": "Глагол ‘suggest’ требует после себя герундия (Ving): suggest doing something."
+      },
+      {
+        "num": 25,
+        "text": "You are very good at languages. You _________ five languages, don’t you?",
+        "options": {
+          "A": "spoke",
+          "B": "are speaking",
+          "C": "speaks",
+          "D": "speak"
+        },
+        "correct": "D",
+        "rule": "Present Simple используется для постоянных фактов и способностей человека."
+      },
+      {
+        "num": 26,
+        "text": "When you called me yesterday, I ______.",
+        "options": {
+          "A": "havecooked",
+          "B": "was cooking",
+          "C": "am cooking",
+          "D": "cook"
+        },
+        "correct": "B",
+        "rule": "Past Continuous (was/were + Ving) описывает действие в процессе в момент другого действия в прошлом."
+      },
+      {
+        "num": 27,
+        "text": "Can I take this newspaper? ___________ with it?",
+        "options": {
+          "A": "Did you finish",
+          "B": "Have you finished",
+          "C": "Had you finished",
+          "D": "Do you finish"
+        },
+        "correct": "B",
+        "rule": "Present Perfect используется для вопроса о завершённости действия к настоящему моменту."
+      },
+      {
+        "num": 28,
+        "text": "Lisa called you, while you were out. Ok. I ______ her back.",
+        "options": {
+          "A": "will call",
+          "B": "call",
+          "C": "have call",
+          "D": "am going to"
+        },
+        "correct": "A",
+        "rule": "Future Simple (will + V) используется для спонтанного решения, принятого в момент речи."
+      },
+      {
+        "num": 29,
+        "text": "He … up at six o’clock every morning last week.",
+        "options": {
+          "A": "gets",
+          "B": "is getting",
+          "C": "gotten",
+          "D": "got"
+        },
+        "correct": "D",
+        "rule": "С указателем прошедшего времени ‘last week’ используется Past Simple."
+      },
+      {
+        "num": 30,
+        "text": "Passengers are forbidden _____ to the driver",
+        "options": {
+          "A": "talk",
+          "B": "to talk",
+          "C": "talkings",
+          "D": "talked"
+        },
+        "correct": "B",
+        "rule": "‘Forbidden’ сочетается с инфинитивом: be forbidden to do something."
+      },
+      {
+        "num": 31,
+        "text": "I have given up ______ any books or magazines.",
+        "options": {
+          "A": "to reading",
+          "B": "read",
+          "C": "reading",
+          "D": "toread"
+        },
+        "correct": "C",
+        "rule": "‘Give up + Ving’ означает ‘бросить делать что-то’."
+      },
+      {
+        "num": 32,
+        "text": "I was woken up by ______________.",
+        "options": {
+          "A": "the rings bell",
+          "B": "the bell rings",
+          "C": "the bell to ringing",
+          "D": "the bell ringing"
+        },
+        "correct": "D",
+        "rule": "После предлога ‘by’ используется герундиальная конструкция с собственным подлежащим: the bell ringing."
+      },
+      {
+        "num": 33,
+        "text": "If my mom _ the lottery, she’d give some of the money to each member of her family.",
+        "options": {
+          "A": "won",
+          "B": "have won",
+          "C": "willwin",
+          "D": "wins"
+        },
+        "correct": "A",
+        "rule": "Второй тип условных предложений: If + Past Simple, would + V."
+      },
+      {
+        "num": 34,
+        "text": "If you are robbed, do ___ the police!",
+        "options": {
+          "A": "called",
+          "B": "call",
+          "C": "to call",
+          "D": "calling"
+        },
+        "correct": "B",
+        "rule": "Усилительное ‘do’ перед повелительным наклонением требует базовой формы глагола."
+      }
+    ]
+  },
+  "reading": {
+    "label": "📖 Reading (35-50)",
+    "questions": [
+      {
+        "num": 35,
+        "text": "Madagascar text: What is the weather in the summer?",
+        "options": {
+          "A": "The weather is wet.",
+          "B": "The weather is rainy.",
+          "C": "The weather is dry.",
+          "D": "The weather is snowy."
+        },
+        "correct": "C",
+        "rule": "В тексте: ‘the summer is usually sunny and dry’."
+      },
+      {
+        "num": 36,
+        "text": "Madagascar text: The east coast of Madagascar is ___________ weather?",
+        "options": {
+          "A": "cold and dry",
+          "B": "hot and wet",
+          "C": "cloudy and warm",
+          "D": "shiny and wet"
+        },
+        "correct": "B",
+        "rule": "В тексте: ‘The east coast is hotter and wetter’."
+      },
+      {
+        "num": 37,
+        "text": "Madagascar text: What is the weather in different parts of Madagascar?",
+        "options": {
+          "A": "cold",
+          "B": "warm",
+          "C": "hot",
+          "D": "different"
+        },
+        "correct": "D",
+        "rule": "В тексте: ‘different parts of the country have very different weather’."
+      },
+      {
+        "num": 38,
+        "text": "Madagascar text: What is the most pleasant season in Madagascar?",
+        "options": {
+          "A": "dry season",
+          "B": "hot season",
+          "C": "wet season",
+          "D": "cold season"
+        },
+        "correct": "A",
+        "rule": "В тексте: ‘The dry season is cooler and more pleasant’."
+      },
+      {
+        "num": 39,
+        "text": "Madagascar text: What is the season with the hottest weather?",
+        "options": {
+          "A": "summer",
+          "B": "autumn",
+          "C": "winter",
+          "D": "spring"
+        },
+        "correct": "A",
+        "rule": "В тексте: ‘The summers can be extremely hot’."
+      },
+      {
+        "num": 40,
+        "text": "Madagascar text: When can the weather make road travel very difficult?",
+        "options": {
+          "A": "between November and April",
+          "B": "between January and May",
+          "C": "between May and October",
+          "D": "between January and March"
+        },
+        "correct": "D",
+        "rule": "В тексте: ‘Avoid visiting eastern Madagascar between January and March...’"
+      },
+      {
+        "num": 41,
+        "text": "Madagascar text: When is the wet season in Madagascar?",
+        "options": {
+          "A": "from January to March",
+          "B": "from November to April",
+          "C": "from May to October",
+          "D": "during the year"
+        },
+        "correct": "B",
+        "rule": "В тексте: ‘a warm, wet season from November to April’."
+      },
+      {
+        "num": 42,
+        "text": "Madagascar text: What is the driest part of Madagascar?",
+        "options": {
+          "A": "the west coast",
+          "B": "the southern coast",
+          "C": "the east coast",
+          "D": "the northern coast"
+        },
+        "correct": "A",
+        "rule": "В тексте: ‘The west coast is the driest part of the island.’"
+      },
+      {
+        "num": 43,
+        "text": "A Musical Boost text: According to the researcher Nina Kraus playing a musical instrument:",
+        "options": {
+          "A": "can boost a person's hearing ability",
+          "B": "can boost a person’s dancing skills",
+          "C": "can boost a person’s ability to talk in a noisy room",
+          "D": "can boost a person’s writing skills"
+        },
+        "correct": "A",
+        "rule": "В тексте: ‘playing a musical instrument can improve a person's hearing ability’."
+      },
+      {
+        "num": 44,
+        "text": "A Musical Boost text: Music improves:",
+        "options": {
+          "A": "hearing abilities in the brain",
+          "B": "reading skills in the brain",
+          "C": "writing skills in the brain",
+          "D": "language abilities in the brain"
+        },
+        "correct": "D",
+        "rule": "Главная идея текста: ‘music boosts certain language abilities in the brain’."
+      },
+      {
+        "num": 45,
+        "text": "A Musical Boost text: Find the true statement",
+        "options": {
+          "A": "Nina Kraus plays in an orchestra",
+          "B": "Nina Kraus is a graduate of Harvard University",
+          "C": "Nina Kraus is a researcher",
+          "D": "Nina Kraus is a violinist"
+        },
+        "correct": "C",
+        "rule": "В тексте она названа ‘researcher Nina Kraus’."
+      },
+      {
+        "num": 46,
+        "text": "A Musical Boost text: The text is about:",
+        "options": {
+          "A": "different instruments and musicians",
+          "B": "brain functioning and different types of patients",
+          "C": "playing different types of musical instruments",
+          "D": "a connection between music and language abilities"
+        },
+        "correct": "D",
+        "rule": "Текст начинается с вопроса ‘Is there a connection between music and language?’."
+      },
+      {
+        "num": 47,
+        "text": "A Musical Boost text: The reason why musicians can hear better is",
+        "options": {
+          "A": "that they use certain language abilities in the brain",
+          "B": "that they are trained to sing and play different instruments",
+          "C": "that they are trained to pay attention to particular sounds",
+          "D": "that they hear their own instruments and many others"
+        },
+        "correct": "C",
+        "rule": "В тексте: ‘Musicians hear better, says Kraus, because they learn to pay attention to certain sounds.’"
+      },
+      {
+        "num": 48,
+        "text": "A Musical Boost text: The synonym of ‘improve’ is",
+        "options": {
+          "A": "roast",
+          "B": "toast",
+          "C": "goast",
+          "D": "boost"
+        },
+        "correct": "D",
+        "rule": "Заголовок текста ‘A Musical Boost’ и фраза ‘music boosts certain language abilities’ = ‘improves’."
+      },
+      {
+        "num": 49,
+        "text": "A Musical Boost text: Music helps people to improve",
+        "options": {
+          "A": "sleeping, swimming and walking",
+          "B": "memory, listening and concentration",
+          "C": "writing, listening and painting",
+          "D": "reading, speaking and dancing"
+        },
+        "correct": "B",
+        "rule": "В тексте: ‘Music improves concentration, memory, listening skills, and our overall language abilities.’"
+      },
+      {
+        "num": 50,
+        "text": "A Musical Boost text: The synonym of ‘to ignore’:",
+        "options": {
+          "A": "to look for",
+          "B": "to vote for",
+          "C": "to pay no attention to",
+          "D": "to stay for"
+        },
+        "correct": "C",
+        "rule": "В тексте: ‘ignore the other sounds’ = не обращать внимания = to pay no attention to."
+      }
+    ]
+  }
+};
+
+const state = {};
+for (const cat in categoriesData) {
+  state[cat] = { stage: 'main', mistakes: null };
+}
+let currentCat = 'listening';
+
+function renderQuestions(container, list, prefix) {
+  container.innerHTML = '';
+  list.forEach((q, i) => {
+    const qDiv = document.createElement('div');
+    qDiv.className = 'question';
+    qDiv.id = prefix + i;
+    let optionsHtml = '';
+    for (const key in q.options) {
+      optionsHtml += `<label><input type="radio" name="${prefix}${i}" value="${key}"> ${key}) ${q.options[key]}</label>`;
+    }
+    qDiv.innerHTML = `
+      <div class="qtext">${q.num}. ${q.text}</div>
+      <div class="options">${optionsHtml}</div>
+      <div class="answerNote"></div>
+    `;
+    container.appendChild(qDiv);
+  });
+}
+
+// Initial render
+renderQuestions(document.getElementById('quiz-listening'), categoriesData.listening.questions, 'qlistening-');
+renderQuestions(document.getElementById('quiz-grammar'), categoriesData.grammar.questions, 'qgrammar-');
+renderQuestions(document.getElementById('quiz-reading-1'), categoriesData.reading.questions.slice(0, 8), 'qreading1-');
+renderQuestions(document.getElementById('quiz-reading-2'), categoriesData.reading.questions.slice(8), 'qreading2-');
+
+function gradeQuestions(list, prefix, showRule) {
+  let correctCount = 0;
+  const mistakes = [];
+  list.forEach((q, i) => {
+    const qDiv = document.getElementById(prefix + i);
+    const selected = qDiv.querySelector(`input[name="${prefix}${i}"]:checked`);
+    const note = qDiv.querySelector('.answerNote');
+    qDiv.classList.remove('correct', 'incorrect');
+
+    if (!selected) {
+      note.innerHTML = 'Не отвечено. Правильный ответ: ' + q.correct + ') ' + q.options[q.correct];
+      qDiv.classList.add('incorrect');
+      mistakes.push(q);
+    } else if (selected.value === q.correct) {
+      correctCount++;
+      qDiv.classList.add('correct');
+      note.textContent = 'Верно!';
+    } else {
+      qDiv.classList.add('incorrect');
+      note.innerHTML = `Неверно. Ваш ответ: ${selected.value}) ${q.options[selected.value]}. Правильный ответ: ${q.correct}) ${q.options[q.correct]}`;
+      mistakes.push(q);
+    }
+    if (showRule) {
+      const ruleDiv = document.createElement('div');
+      ruleDiv.className = 'rule';
+      ruleDiv.textContent = '\u{1F4A1} ' + q.rule;
+      note.appendChild(ruleDiv);
+    }
+  });
+  return { correctCount, mistakes };
+}
+
+function gradeMainStage(cat) {
+  if (cat === 'reading') {
+    const r1 = gradeQuestions(categoriesData.reading.questions.slice(0, 8), 'qreading1-', false);
+    const r2 = gradeQuestions(categoriesData.reading.questions.slice(8), 'qreading2-', false);
+    return {
+      correctCount: r1.correctCount + r2.correctCount,
+      mistakes: r1.mistakes.concat(r2.mistakes)
+    };
+  }
+  return gradeQuestions(categoriesData[cat].questions, 'q' + cat + '-', false);
+}
+
+function updateActionButton() {
+  const s = state[currentCat];
+  const btn = document.getElementById('actionBtn');
+  btn.disabled = false;
+  if (s.stage === 'main') btn.textContent = 'Проверить';
+  else if (s.stage === 'mistakes') btn.textContent = 'Проверить исправления';
+  else {
+    btn.textContent = 'Раздел завершён';
+    btn.disabled = true;
+  }
+}
+
+function switchTab(cat) {
+  currentCat = cat;
+  document.querySelectorAll('.tabBtn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  document.querySelectorAll('.tabPanel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + cat));
+  updateActionButton();
+}
+
+document.querySelectorAll('.tabBtn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.cat));
+});
+
+document.getElementById('actionBtn').addEventListener('click', () => {
+  const cat = currentCat;
+  const s = state[cat];
+
+  if (s.stage === 'main') {
+    const result = gradeMainStage(cat);
+    const scoreDiv = document.getElementById('score-' + cat);
+    scoreDiv.style.display = 'block';
+    scoreDiv.textContent = `Результат: ${result.correctCount} из ${categoriesData[cat].questions.length}`;
+
+    if (result.mistakes.length > 0) {
+      document.getElementById('mistakesWork-' + cat).style.display = 'block';
+      const mistakesPrefix = 'm' + cat + '-';
+      renderQuestions(document.getElementById('mistakesQuiz-' + cat), result.mistakes, mistakesPrefix);
+      s.mistakes = result.mistakes;
+      s.stage = 'mistakes';
+    } else {
+      document.getElementById('finalMessage-' + cat).innerHTML = '<h2 class="sectionTitle">Отлично! Ошибок нет.</h2>';
+      s.stage = 'done';
+    }
+  } else if (s.stage === 'mistakes') {
+    const mistakesPrefix = 'm' + cat + '-';
+    const result = gradeQuestions(s.mistakes, mistakesPrefix, true);
+    document.getElementById('finalMessage-' + cat).innerHTML =
+      `<h2 class="sectionTitle">Работа над ошибками завершена: ${result.correctCount} из ${s.mistakes.length} правильно</h2>`;
+    s.stage = 'done';
+  }
+  updateActionButton();
+  window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+});
+
+updateActionButton();
+</script>
+
+</body>
+</html>
